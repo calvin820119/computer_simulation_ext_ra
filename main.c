@@ -59,7 +59,6 @@ void ra_procedure(ext_ra_inst_t *inst){
 	
     int i;
     int rar;
-    int collide_counter=0;
     ue_t *iterator, *iterator1;
     
     inst->ras+=1;    
@@ -94,7 +93,6 @@ void ra_procedure(ext_ra_inst_t *inst){
                         iterator->retransmit_counter += 1;
                         //  uniform backoff
                         iterator->backoff_counter = (int)(inst->back_off_window_size*lcgrand(4));
-                        collide_counter += 1;
                     }
                     iterator1 = iterator;
                     iterator = iterator->next;
