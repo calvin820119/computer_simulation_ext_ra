@@ -1,11 +1,7 @@
 #ifndef _EXT_RA_
 #define _EXT_RA_
 
-#define total_ras 10000
 
-#define number_of_preamble 30
-
-#define num_ue 1000
 
 typedef enum rar_e{
 	conventional=1,
@@ -38,12 +34,15 @@ typedef struct preamble_s{
 
 typedef struct ext_ra_inst_s{
     
+    int total_ras;
+    int number_of_preamble;
+    int num_ue;
     float mean_interarrival;
     float ra_period;
     rar_t rar_type;
-    ue_t ue_list[1000];
+    ue_t *ue_list;//[1000];
     int max_retransmit;
-    preamble_t preamble_table[30];
+    preamble_t *preamble_table;//[30];
     int back_off_window_size;
     int ras;
     int failed;
@@ -64,6 +63,7 @@ void ra_procedure(ext_ra_inst_t *inst);
 void ue_selected_preamble(ext_ra_inst_t *inst, int ue_id);
 void ue_arrival(ext_ra_inst_t *inst, int next_event_type);
 void initialize(ext_ra_inst_t *inst);
+void initialize_ue_preamble(ext_ra_inst_t *inst);
 void timing(ext_ra_inst_t *inst); 
 void report(ext_ra_inst_t *inst);
 #endif
