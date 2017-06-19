@@ -1,7 +1,5 @@
-#ifndef _EXT_RA_
-#define _EXT_RA_
-
-
+#ifndef _EXT_RAR_
+#define _EXT_RAR_
 
 typedef enum rar_e{
 	conventional=1,
@@ -11,7 +9,7 @@ typedef enum rar_e{
 }rar_t;
 
 typedef enum events_e{
-	event_ra_period,
+	event_ra_period=0,
 	event_stop,
 	num_normal_event
 }events_t;
@@ -22,15 +20,15 @@ typedef struct ue_s{
     int is_active;
     int retransmit_counter;
     int backoff_counter;
+    float access_delay;
     struct ue_s *next;
 }ue_t;
 
 typedef struct preamble_s{
+	int selected;
     int num_selected_rar[4];
 	ue_t *rar_ue_list[4];
 }preamble_t;
-
-    
 
 typedef struct ext_ra_inst_s{
     
@@ -39,10 +37,10 @@ typedef struct ext_ra_inst_s{
     int num_ue;
     float mean_interarrival;
     float ra_period;
-    rar_t rar_type;
-    ue_t *ue_list;//[1000];
+    int rar_type;
+    ue_t *ue_list;
     int max_retransmit;
-    preamble_t *preamble_table;//[30];
+    preamble_t *preamble_table;
     int back_off_window_size;
     int ras;
     int failed;
@@ -53,7 +51,11 @@ typedef struct ext_ra_inst_s{
     int retransmit;
     int once_attempt_collide;
     int trial;
-
+    
+	float total_access_delay;
+	int rar_success;
+	int rar_failed;
+	int rar_waste;
 }ext_ra_inst_t;
 
 
@@ -66,4 +68,5 @@ void initialize(ext_ra_inst_t *inst);
 void initialize_ue_preamble(ext_ra_inst_t *inst);
 void timing(ext_ra_inst_t *inst); 
 void report(ext_ra_inst_t *inst);
+
 #endif

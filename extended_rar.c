@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "main.h"
+#include "extended_rar.h"
 #include "lcgrand.h"
 
 //#define print_output
@@ -15,7 +15,7 @@ static FILE *fin;
 static FILE *fout;
 
 static char str_fin_name[] = "config.in";
-static char str_fout_name[50];// = "result.out";
+static char str_fout_name[50];
 
 int main(int argc, char *argv[]){
 
@@ -44,8 +44,8 @@ int main(int argc, char *argv[]){
     }
 #endif
 
-	//sprintf(str_fout_name, "out/%d_rar%d.out", ext_ra_inst.num_ue, ext_ra_inst.rar_type);
 	sprintf(str_fout_name, "out/rar%d.out", ext_ra_inst.rar_type);
+
 	if((FILE *)0 == (fout = fopen(str_fout_name, "ab+"))){
 		printf(".out file access error!\n");
 		return 1;
@@ -66,11 +66,10 @@ int main(int argc, char *argv[]){
 #endif
 	do{
 	    timing(&ext_ra_inst);
-	    //printf("%f\n", sim_time);
 	    switch(next_event_type){
 	        case event_ra_period:
                 ra_procedure(&ext_ra_inst);
-	            ue_backoff_process(&ext_ra_inst);
+                ue_backoff_process(&ext_ra_inst);
 	            break;
 	        case event_stop:
 #ifdef print_output
@@ -84,16 +83,15 @@ int main(int argc, char *argv[]){
 	    }
 	
 	}while(event_stop != next_event_type);
-	
-	
+
+#ifdef file_input
 	fclose(fin);
+#endif
 	fclose(fout);
-	
 	return 0;
 }
 
 float exponetial(float mean){
-    //return mean;
     return -mean * log(lcgrand(1));
 }
 
@@ -122,13 +120,12 @@ void ra_procedure(ext_ra_inst_t *inst){
     for(i=0;i<inst->number_of_preamble;++i){
         for(rar=0;rar<inst->rar_type;++rar){
             if(inst->preamble_table[i].num_selected_rar[rar] > 1){
+            	inst->preamble_table[i].selected = 1;
+            	
                 //  collision
                 inst->collide += inst->preamble_table[i].num_selected_rar[rar];
                 iterator = inst->preamble_table[i].rar_ue_list[rar];
                 while((ue_t *)0 != iterator){
-                    // if(iterator->retransmit_counter == 0){
-                        // inst->once_attempt_collide += 1;
-                    // }
                     iterator = iterator->next;
                 }
                 
@@ -154,13 +151,11 @@ void ra_procedure(ext_ra_inst_t *inst){
                     iterator1->next = (ue_t *)0;
                 }
             }else if(inst->preamble_table[i].num_selected_rar[rar] == 1){
+            	inst->preamble_table[i].selected = 1;
+            	
                 //  success
-                
+                inst->total_access_delay += sim_time - inst->preamble_table[i].rar_ue_list[rar]->access_delay;
                 inst->success+=1;
-                
-                //if(inst->preamble_table[i].rar_ue_list[rar]->retransmit_counter == 0){
-                //    inst->once_attempt_success+=1;
-                //}
                 
                 inst->preamble_table[i].rar_ue_list[rar]->is_active = 0x0;
                 inst->preamble_table[i].rar_ue_list[rar]->retransmit_counter = 0x0;
@@ -169,24 +164,35 @@ void ra_procedure(ext_ra_inst_t *inst){
                 inst->preamble_table[i].rar_ue_list[rar]->next = (ue_t *)0;
                 
             }
-            // clear rar table
-            inst->preamble_table[i].rar_ue_list[rar] = (ue_t *)0;
-            inst->preamble_table[i].num_selected_rar[rar] = 0;
+            
+            
         }
+        
+        for(rar=0;rar<inst->rar_type;++rar){
+        	if(inst->preamble_table[i].selected == 1){
+        		if(inst->preamble_table[i].num_selected_rar[rar] == 1){
+        			inst->rar_success += 1;
+				}else if(inst->preamble_table[i].num_selected_rar[rar] > 1){
+					inst->rar_failed += 1;
+				}else{
+					inst->rar_waste += 1;
+				}
+			}
+			// clear rar table after finished calculation RAR_Wasted
+			inst->preamble_table[i].rar_ue_list[rar] = (ue_t *)0;
+			inst->preamble_table[i].num_selected_rar[rar] = 0;
+		}
+		inst->preamble_table[i].selected = 0;
     }
     time_next_event[event_ra_period] = sim_time + inst->ra_period;
-
 }
-
-
-
 
 void ue_arrival(ext_ra_inst_t *inst, int next_event_type){
     int ue_id = next_event_type - num_normal_event;
     inst->attempt+=1;
+    inst->ue_list[ue_id].access_delay = sim_time;
     ue_selected_preamble(inst, ue_id);
 }
-
 
 void ue_selected_preamble(ext_ra_inst_t *inst, int ue_id){
     ue_t *iterator2;
@@ -230,6 +236,7 @@ void initialize_ue_preamble(ext_ra_inst_t *inst){
         inst->ue_list[i].preamble_index = 0;
         inst->ue_list[i].arrival_time = sim_time + exponetial(inst->mean_interarrival);
         inst->ue_list[i].next = (ue_t *)0;
+        inst->ue_list[i].access_delay = 0;
     }
     
     for(i=0;i<inst->number_of_preamble;++i){
@@ -238,13 +245,14 @@ void initialize_ue_preamble(ext_ra_inst_t *inst){
     		inst->preamble_table[i].rar_ue_list[j] = (ue_t *)0;
 		}
 	}
+	time_next_event[event_ra_period] = sim_time + inst->ra_period;
 }
 
 void initialize(ext_ra_inst_t *inst){
     
     //  simulator
     sim_time = 0.0f;
-    time_next_event[event_ra_period] = sim_time + inst->ra_period;
+    
     time_next_event[event_stop] = stop_time;
     next_event_type = event_ra_period;
     
@@ -258,6 +266,10 @@ void initialize(ext_ra_inst_t *inst){
     // inst->once_attempt_collide=0;
     inst->trial=0;
     inst->ras = 0;
+    inst->total_access_delay = 0.0f;
+    inst->rar_success = 0;
+	inst->rar_failed = 0;
+	inst->rar_waste = 0;
     
     //  extended RA
     inst->total_ras = 0;
@@ -276,6 +288,7 @@ void initialize(ext_ra_inst_t *inst){
 void timing(ext_ra_inst_t *inst){ 
     int i;
     float min_time_next_event = time_next_event[event_ra_period];
+    
     next_event_type = event_ra_period;
     
     for(i=0;i<inst->num_ue;++i){
@@ -298,24 +311,18 @@ void timing(ext_ra_inst_t *inst){
 }
 
 void report(ext_ra_inst_t *inst){ 
-    int i, rest=0;
+    int i, rest=0, rar_total=0;
     int num_ras = inst->total_ras;
     float avg_num_attempt = (float)inst->attempt/num_ras;
     float avg_num_success = (float)inst->success/num_ras;
     float avg_num_collide = (float)inst->collide/num_ras;
-    //float avg_num_once_success = (float)inst->once_attempt_success/num_ras;
-    //float avg_num_once_collide = (float)inst->once_attempt_collide/num_ras;
-
-    //printf("total attempt : %d\n", inst->attempt);
-    //printf("once success  : %d\n", inst->once_attempt_success);
-    //printf("once collide  : %d\n", inst->once_attempt_collide);
     
     for(i=0;i<inst->num_ue;++i){
         if(1 == inst->ue_list[i].is_active){
             ++rest;
         }
     }
-    
+    rar_total = inst->rar_failed + inst->rar_success + inst->rar_waste;
 #ifdef print_output
     printf("total attemp  : %d\n", inst->attempt);
     printf("total success : %d\n", inst->success);
@@ -329,14 +336,22 @@ void report(ext_ra_inst_t *inst){
     printf("avg. prob. success: %f\n", (float)inst->success/inst->trial);
     printf("avg. prob. collide: %f\n", (float)inst->collide/inst->trial);
     printf("\n");
+    printf("avg. access delay : %f\n", inst->total_access_delay/inst->success);
+    printf("rar success rate  : %f\n", (float)inst->rar_success/rar_total);
+    printf("rar failed  rate  : %f\n", (float)inst->rar_failed/rar_total);
+    printf("rar waste   rate  : %f\n", (float)inst->rar_waste/rar_total);
+    printf("\n");
 #endif
-    fprintf(fout, "%f ", avg_num_success);
-    fprintf(fout, "%f\n", (float)inst->collide/inst->trial);
     
-    //printf("once\n");
-    //printf("avg. prob. success: %f\n", (float)inst->once_attempt_success/inst->attempt);
-    //printf("avg. prob. collide: %f\n", (float)inst->once_attempt_collide/inst->attempt);
-    //printf("\n\n");
+    fprintf(fout, "%f ", avg_num_success);
+    fprintf(fout, "%f ", (float)inst->collide/inst->trial);
+    fprintf(fout, "%f ", inst->total_access_delay/inst->success);
+
+    fprintf(fout, "%f ", (float)inst->rar_success/rar_total);
+    fprintf(fout, "%f ", (float)inst->rar_failed/rar_total);
+    fprintf(fout, "%f ", (float)inst->rar_waste/rar_total);
+    fprintf(fout, "%d\n", inst->rar_waste);
+
 }
 
 

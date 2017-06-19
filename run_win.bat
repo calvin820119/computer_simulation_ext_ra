@@ -1,0 +1,43 @@
+extended_rar.exe 10000 30 100 0.01 6 20 0.05 1
+extended_rar.exe 10000 30 200 0.01 6 20 0.05 1
+extended_rar.exe 10000 30 300 0.01 6 20 0.05 1
+extended_rar.exe 10000 30 400 0.01 6 20 0.05 1
+extended_rar.exe 10000 30 500 0.01 6 20 0.05 1
+extended_rar.exe 10000 30 600 0.01 6 20 0.05 1
+extended_rar.exe 10000 30 700 0.01 6 20 0.05 1
+extended_rar.exe 10000 30 800 0.01 6 20 0.05 1
+extended_rar.exe 10000 30 900 0.01 6 20 0.05 1
+extended_rar.exe 10000 30 1000 0.01 6 20 0.05 1
+
+extended_rar.exe 10000 30 100 0.01 6 20 0.05 2
+extended_rar.exe 10000 30 200 0.01 6 20 0.05 2
+extended_rar.exe 10000 30 300 0.01 6 20 0.05 2
+extended_rar.exe 10000 30 400 0.01 6 20 0.05 2
+extended_rar.exe 10000 30 500 0.01 6 20 0.05 2
+extended_rar.exe 10000 30 600 0.01 6 20 0.05 2
+extended_rar.exe 10000 30 700 0.01 6 20 0.05 2
+extended_rar.exe 10000 30 800 0.01 6 20 0.05 2
+extended_rar.exe 10000 30 900 0.01 6 20 0.05 2
+extended_rar.exe 10000 30 1000 0.01 6 20 0.05 2
+
+extended_rar.exe 10000 30 100 0.01 6 20 0.05 3
+extended_rar.exe 10000 30 200 0.01 6 20 0.05 3
+extended_rar.exe 10000 30 300 0.01 6 20 0.05 3
+extended_rar.exe 10000 30 400 0.01 6 20 0.05 3
+extended_rar.exe 10000 30 500 0.01 6 20 0.05 3
+extended_rar.exe 10000 30 600 0.01 6 20 0.05 3
+extended_rar.exe 10000 30 700 0.01 6 20 0.05 3
+extended_rar.exe 10000 30 800 0.01 6 20 0.05 3
+extended_rar.exe 10000 30 900 0.01 6 20 0.05 3
+extended_rar.exe 10000 30 1000 0.01 6 20 0.05 3
+
+extended_rar.exe 10000 30 100 0.01 6 20 0.05 4
+extended_rar.exe 10000 30 200 0.01 6 20 0.05 4
+extended_rar.exe 10000 30 300 0.01 6 20 0.05 4
+extended_rar.exe 10000 30 400 0.01 6 20 0.05 4
+extended_rar.exe 10000 30 500 0.01 6 20 0.05 4
+extended_rar.exe 10000 30 600 0.01 6 20 0.05 4
+extended_rar.exe 10000 30 700 0.01 6 20 0.05 4
+extended_rar.exe 10000 30 800 0.01 6 20 0.05 4
+extended_rar.exe 10000 30 900 0.01 6 20 0.05 4
+extended_rar.exe 10000 30 1000 0.01 6 20 0.05 4
